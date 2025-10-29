@@ -1,0 +1,9 @@
+{
+    "database": "SampleData",
+    "sizes": {
+      "small":  "SmallTable",
+      "medium": "Medium",
+      "large":  "Large"
+    }
+  }
+  
