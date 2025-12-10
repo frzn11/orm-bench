@@ -9,14 +9,14 @@ RUNNER="${RUNNER:-./scripts/run-one.sh}"
 # OPS=(getall getbyid update create delete) # 5
 # SIZES=(small medium large)                # 3
 
-ORMS=(nhib)                # 3
+ORMS=(efcore)                # 3
 OPS=(create delete) # 5
 SIZES=(small medium large)                # 3
 
 
 # Pass-through / defaults
 REPS="${REPS:-1}"
-SAPWD="${SAPWD:-YourStrong!Passw0rd}"
+SAPWD="CAPstone1"
 
 # Optional: small pause between runs to reduce thermal carryover (seconds)
 SLEEP_BETWEEN="${SLEEP_BETWEEN:-0}"

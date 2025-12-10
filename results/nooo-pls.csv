@@ -1,0 +1,7 @@
+timestamp,orm,op,size,table,reps,duration_ms,rows_affected,energy_j
+"2025-12-06T08:00:00.8334574Z","efcore","create","small","SmallTable",1000,5486,1000,68.59308599999986
+"2025-12-06T08:00:21.0442571Z","efcore","create","medium","Medium",1000,5372,1000,66.04316599999993
+"2025-12-06T08:00:41.0813428Z","efcore","create","large","Large",1000,5297,1000,64.85451000000012
+"2025-12-06T08:01:01.1309959Z","efcore","delete","small","SmallTable",1000,5745,1000,75.2922880000001
+"2025-12-06T08:01:21.4725415Z","efcore","delete","medium","Medium",1000,5925,1000,78.01756200000045
+"2025-12-06T08:01:41.5479770Z","efcore","delete","large","Large",1000,5645,1000,73.52416499999981

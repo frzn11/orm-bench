@@ -65,8 +65,13 @@ public static class NHibernateHelper
 
         cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
+
         cfg.CurrentSessionContext<NHibernate.Context.ThreadStaticSessionContext>();
         cfg.SetProperty(NHibernate.Cfg.Environment.UseProxyValidator, "false");
+        cfg.SetProperty(NHibernate.Cfg.Environment.BatchSize, "0");
+
+        cfg.SetProperty(NHibernate.Cfg.Environment.GenerateStatistics, "true");
+
 
         return cfg.BuildSessionFactory();
     }

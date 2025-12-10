@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CSV="results/runs.csv"
+CSV="results/nooo-pls.csv"
 DOTNET_PROJ="src/Bench/Bench.csproj"
 
 ORM="${ORM:-dapper}"
 OP="${OP:-getAll}"         # create|getById|getAll|update|delete
 SIZE="${SIZE:-small}"      # small|medium|large
 REPS="${REPS:-1}"
-SAPWD="${SAPWD:-YourStrong!Passw0rd}"
+SAPWD="${SAPWD}" 
 
 mkdir -p "$(dirname "$CSV")"
 

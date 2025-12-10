@@ -249,7 +249,7 @@ switch (orm)
                     break;}
 
             case "delete":{
-                    int[] ints = GenerateIntegers(1,reps+n,reps);
+                    int[] ints = GenerateIntegers(1,n,reps);
 
                         using (var conn = new SqlConnection(connStr))
                         {
@@ -364,9 +364,12 @@ switch (orm)
 
                             for (int i = 0; i < reps; i++)
                             {
+                                using var tx = context.Database.BeginTransaction();
 
                                 var result = context.SmallTable.AsNoTracking().Single(x => x.id == ints[i%n]);
+                                tx.Commit();
                             }
+
 
                             sw.Stop();
                             time = sw.ElapsedMilliseconds;
@@ -425,10 +428,13 @@ switch (orm)
 
                             foreach (var e in entities)
                             {
+                                using var tx = context.Database.BeginTransaction();
 
 
                                 context.Add(e);
                                 rowsAffected += context.SaveChanges();
+
+                                tx.Commit();
                             }
 
                             sw.Stop();
@@ -440,7 +446,7 @@ switch (orm)
 
 
             case "delete":{
-                        int[] ints = GenerateIntegers(1,n+reps,reps);
+                        int[] ints = GenerateIntegers(1,reps+n,reps);
 
                         var options = new DbContextOptionsBuilder<BenchDbContext>()
                                         .UseSqlServer(connStr)
@@ -454,13 +460,14 @@ switch (orm)
 
                             WaitForCoolDown(thresholdC: 50, waitSeconds: 10);
 
-                            using var tx = context.Database.BeginTransaction();
+                            
 
                             startEnergy = rapl.ReadJoules();
                             var sw = Stopwatch.StartNew();
 
                             for (int i = 0; i < reps; i++)
                             {
+                                using var tx = context.Database.BeginTransaction();
                                 var row = context.SmallTable.AsNoTracking().FirstOrDefault(r => r.id == ints[i]);
                                 if (row!=null){
                                     context.SmallTable.Remove(row);
@@ -469,9 +476,10 @@ switch (orm)
                                 else{
                                     Console.Error.WriteLine("ef del error");
                                 }
+                                tx.Commit();
 
                             }
-                            tx.Commit();
+                            
 
                             sw.Stop();
                             time = sw.ElapsedMilliseconds;
@@ -495,13 +503,13 @@ switch (orm)
 
 
                         WaitForCoolDown(thresholdC: 50, waitSeconds: 10);
-                        using var tx = context.Database.BeginTransaction();
 
                         startEnergy = rapl.ReadJoules();
                         var sw = Stopwatch.StartNew();
 
                         for (int i = 0; i < reps; i++)
                         {
+                            using var tx = context.Database.BeginTransaction();
         
 
                             var row = context.SmallTable.AsNoTracking().FirstOrDefault(r => r.id == ids[i%(n)]);
@@ -519,9 +527,9 @@ switch (orm)
                                 context.ChangeTracker.Clear();
 
                             }
+                            tx.Commit();
                         }
 
-                        tx.Commit();
 
                         sw.Stop();
                         time = sw.ElapsedMilliseconds;
@@ -551,6 +559,7 @@ switch (orm)
                             {
                                 var results = session.Query<SmallTable>().ToList();
                                 rowsAffected += results.Count;
+
                             }
                             transaction.Commit();
 
@@ -572,7 +581,6 @@ switch (orm)
 
                         var sessionFactory = NHibernateHelper.BuildSessionFactory(connStr, table);
                         using (var session = sessionFactory.OpenSession())
-                        using (var transaction = session.BeginTransaction())
                         {
 
                             WaitForCoolDown(thresholdC: 50, waitSeconds: 10);
@@ -582,15 +590,20 @@ switch (orm)
 
                             for (int i = 0; i < reps; i++)
                             {
+                                using (var transaction = session.BeginTransaction()){
                                 var query = session.Query<SmallTable>().FirstOrDefault(r => r.id == ints[(i+1)%n]);
+
+                                transaction.Commit();
+                                }
 
                             }
 
-                            transaction.Commit();
 
                             sw.Stop();
                             time = sw.ElapsedMilliseconds;
                             endEnergy = rapl.ReadJoules();
+
+
                         }
 
 
@@ -631,7 +644,6 @@ switch (orm)
 
                         var sessionFactory = NHibernateHelper.BuildSessionFactory(connStr, table);
                         using (var session = sessionFactory.OpenSession())
-                        using (var transaction = session.BeginTransaction())
                         {
 
                             WaitForCoolDown(thresholdC: 50, waitSeconds: 10);
@@ -641,17 +653,25 @@ switch (orm)
                             var sw = Stopwatch.StartNew();
 
                             foreach (var e in entities){
+                                using (var transaction = session.BeginTransaction()){
+                                
                                 session.Save(e);
-                                rowsAffected++;
+                                transaction.Commit();
+                                }
                             }
                                 
 
+                            
+                            
 
-                            transaction.Commit();
 
                             sw.Stop();
                             time = sw.ElapsedMilliseconds;
                             endEnergy = rapl.ReadJoules();
+
+
+
+
                         }
 
 
@@ -664,12 +684,12 @@ switch (orm)
 
 
 
-                        int[] ints = GenerateIntegers(1,reps+n,reps);
+                        int[] ints = GenerateIntegers(1,n+reps,reps);
 
 
                         var sessionFactory = NHibernateHelper.BuildSessionFactory(connStr, table);
                         using (var session = sessionFactory.OpenSession())
-                        using (var transaction = session.BeginTransaction())
+                        //using (var transaction = session.BeginTransaction())
                         {
 
                             WaitForCoolDown(thresholdC: 50, waitSeconds: 10);
@@ -679,15 +699,20 @@ switch (orm)
 
                             for (int i = 0; i < reps; i++)
                             {
-                                var row = session.Get<SmallTable>(ints[i]);   
-                                session.Delete(row);
+                                using (var transaction = session.BeginTransaction()){
+                                    var row = session.Get<SmallTable>(ints[i]);   
+                                    session.Delete(row);
+                                    transaction.Commit();
+                                }
+                                
                             }
 
-                            transaction.Commit();
 
                             sw.Stop();
                             time = sw.ElapsedMilliseconds;
                             endEnergy = rapl.ReadJoules();
+
+
                         }
 
 
@@ -702,7 +727,7 @@ switch (orm)
 
                         var sessionFactory = NHibernateHelper.BuildSessionFactory(connStr, table);
                         using (var session = sessionFactory.OpenSession())
-                        using (var transaction = session.BeginTransaction())
+                        //using (var transaction = session.BeginTransaction())
                         {
 
                             WaitForCoolDown(thresholdC: 50, waitSeconds: 10);
@@ -712,18 +737,25 @@ switch (orm)
 
                             for (int i = 0; i < reps; i++)
                             {
-                                var row = session.Get<SmallTable>(ints[i%(n)]);
+                                using (var transaction = session.BeginTransaction()){
+                                    var row = session.Get<SmallTable>(ints[i%(n)]);
 
-                                row.str_col1 = strs[i%100]; 
-                                rowsAffected++;                
+                                    row.str_col1 = strs[i%100]; 
+                                    session.Update(row);
+                                    rowsAffected++;                
+
+                                    transaction.Commit();
+                                }
 
                             }
 
-                            transaction.Commit();
 
                             sw.Stop();
                             time = sw.ElapsedMilliseconds;
                             endEnergy = rapl.ReadJoules();
+
+
+
                         }
 
         

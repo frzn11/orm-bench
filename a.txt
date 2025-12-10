@@ -1,3 +1,27 @@
 dotnet build -c Release src/Bench/Bench.csproj
 sqlcmd -S localhost,1433 -U sa -P 'CAPstone1' -C -N
-sudo ORM=dapper OP=update SIZE=small REPS=20 SAPWD=CAPstone1 ./scripts/run-one.sh
+sudo ORM=dapper OP=create SIZE=small REPS=20 SAPWD=CAPstone1 ./scripts/run-one.sh
+
+sudo REPS=1000 SLEEP_BETWEEN=2 ./scripts/run-all.sh
+
+
+dotnet run --project "$DOTNET_PROJ" -c Release -- \
+  --orm "$ORM" --op "$OP" --size "small" --reps "$1" --sapwd "CAPstone1"
+
+  psql -h localhost -U ormuser -d ormbench -c "Select * from smalltable"
+psql -h localhost -U ormuser -d ormbench -c "\copy smalltable FROM '~/Downloads/SmallTable.csv' WITH (FORMAT csv, HEADER true)"
+
+
+
+
+for r in {1..5}; do   sudo REPS=1000 SLEEP_BETWEEN=15 ./scripts/run-all.sh; done
+
+
+
+
+
+
+
+delete from smalltable;delete from medium;delete from large;
+
+BULK INSERT SmallTable FROM '/var/opt/mssql/data/SmallTable.csv' WITH (FORMAT='CSV', FIRSTROW=2, FIELDTERMINATOR=',', ROWTERMINATOR='\n');BULK INSERT Medium FROM '/var/opt/mssql/data/MediumTable.csv' WITH (FORMAT='CSV', FIRSTROW=2, FIELDTERMINATOR=',', ROWTERMINATOR='\n');BULK INSERT Large FROM '/var/opt/mssql/data/LargeTable.csv' WITH (FORMAT='CSV', FIRSTROW=2, FIELDTERMINATOR=',', ROWTERMINATOR='\n');
